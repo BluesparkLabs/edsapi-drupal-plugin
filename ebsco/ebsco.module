@@ -30,7 +30,19 @@ $_ebsco_document = NULL;
  ******************************************/
 
 /**
- * Implements hook_user_login().
+ * Implements hook_ctools_plugin_directory().
+ */
+function ebsco_ctools_plugin_directory($module, $plugin) {
+  if ($module == 'ctools' && in_array($plugin, array('content_types'))) {
+    return "plugins/$plugin";
+  }
+}
+
+/**
+ * Implements hook_user_login.
+ *
+ * Redirects after login
+ *
  */
 function ebsco_user_login(&$edit, $account) {
 
