@@ -239,7 +239,7 @@
   <?php foreach ($records as $record):
 
     $id = check_plain($record->record_id());
-    $recordUrl = $recordUrl = url($record->p_link, array('absolute' => TRUE));
+    $recordUrl = url($record->p_link, array('absolute' => TRUE));
     $fulltextUrl = url('ebsco/fulltext', array('query' => array('id' => $id)));
     $pdfUrl = url('ebsco/pdf', array('query' => array('id' => $id)));
 
