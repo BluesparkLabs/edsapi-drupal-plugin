@@ -68,9 +68,29 @@ function ebsco_theme() {
     ),
     'ebsco_results' => array(
       'template' => 'templates/ebsco-results',
+      'variables' => array(
+        'lookfor' => NULL,
+        'pager' => NULL,
+        'record_count' => NULL,
+        'record_end' => NULL,
+        'record_start' => NULL,
+        'records' => NULL,
+        'search_time' => NULL,
+        'search_view' => NULL,
+        'sort_form' => NULL,
+      ),
     ),
     'ebsco_side_facets' => array(
       'template' => 'templates/ebsco-side-facets',
+      'variables' => array(
+        'record_count' => NULL,
+        'expanders' => NULL,
+        'limiters' => NULL,
+        'facets' => NULL,
+        'filters' => NULL,
+        'search_params' => NULL,
+        'link_search_params' => NULL,
+      ),
     ),
     'ebsco_basic_search' => array(
       'template' => 'templates/ebsco-basic-search',
@@ -395,10 +415,43 @@ function ebsco_basic_search_block() {
 }
 
 /**
- * EBSCO side facets block callback.
+ * Init the EBSCODocument search.
  */
+function ebsco_init_search_document($params = NULL) {
+  // If there are input params also ensure that we add the
+  // request params where we receive the page, sort, etc.
+  if ($params) {
+    $params += $_REQUEST;
+  }
+
+  $_ebsco_document = &drupal_static(__FUNCTION__, array());
+  if (empty($_ebsco_document)) {
+    $_ebsco_document = new EBSCODocument($params);
+    $_ebsco_document->info();
+    $_ebsco_document->search();
+  }
+  return $_ebsco_document;
+}
+
 function ebsco_side_facets_block() {
-  return theme('ebsco_side_facets');
+  // only build the facets when viewed page is ebsco search
+  if (request_path() != 'search/ebsco') {
+    return;
+  }
+  $_ebsco_document = ebsco_init_search_document();
+  $variables['record_count'] = $_ebsco_document->record_count();
+  //$variables['expanders'] = $_ebsco_document->expanders();
+  //$variables['limiters'] = $_ebsco_document->limiters();
+  $variables['facets'] = $_ebsco_document->facets();
+
+  // Applied facets, limiters or expanders
+  $variables['filters'] = $_ebsco_document->filters();
+
+  // Hidden parameters.
+  $variables['search_params'] = $_ebsco_document->search_params();
+  $variables['link_search_params'] = $_ebsco_document->link_search_params();
+
+  return theme('ebsco_side_facets', $variables);
 }
 
 /******************************************************
@@ -877,23 +930,14 @@ function ebsco_advanced_search_form_submit($form, &$form_state) {
 }
 
 /**
- * Process variables for ebsco-results.tpl.php.
- *
- * @see ebsco-results.tpl.php
+ * Get the search results.
  */
-function template_preprocess_ebsco_results(&$variables) {
-  global $_ebsco_document;
+function ebsco_get_search_results() {
+  $_ebsco_document = ebsco_init_search_document();
   $params = $_REQUEST;
-
-  $_SESSION['EBSCO']['redirect'] = drupal_get_destination();
-  if (empty($_ebsco_document)) {
-    $_ebsco_document = new EBSCODocument();
-  }
 
   $title = !empty($params['lookfor']) ? ' - ' . $params['lookfor'] : '';
   drupal_set_title('Search results' . $title);
-
-  $_ebsco_document->search();
 
   $variables['records'] = $_ebsco_document->records();
   $variables['record_start'] = $_ebsco_document->record_start();
@@ -904,10 +948,11 @@ function template_preprocess_ebsco_results(&$variables) {
   $variables['relatedContent'] = $_ebsco_document->relatedContent();
   $variables['autoSuggestTerms'] = $_ebsco_document->autoSuggestTerms();
   $variables['lookfor'] = '';
+
   if (isset($params['lookfor'])) {
     $variables['lookfor'] = $params['lookfor'];
   }
-  elseif (isset($params['group'])) {
+  else if (isset($params['group'])) {
     $types = EBSCODocument::basic_search_type_options();
     foreach ($params['group'] as $key => $group) {
       if (!empty($group['lookfor'])) {
@@ -918,11 +963,14 @@ function template_preprocess_ebsco_results(&$variables) {
   }
   $variables['pager'] = $_ebsco_document->pager();
 
-  $v1 = drupal_get_form('ebsco_sort_form');
-  $variables['sort_form'] = drupal_render($v1);
+  $sort_form = drupal_get_form('ebsco_sort_form');
+  $variables['sort_form'] = drupal_render($sort_form);
 
   // Save data needed by scroller in Detailed view page
-  // $_ebsco_document->search_write();
+  //$_ebsco_document->search_write();
+
+  // theme results
+  return theme('ebsco_results', $variables);
 }
 
 /**
@@ -996,31 +1044,6 @@ function template_preprocess_ebsco_result(&$variables) {
   $variables['last_search'] = $lastSearch;
 
   drupal_set_title($record->title);
-}
-
-/**
- * Process variables for ebsco-side-facets.tpl.php.
- *
- * @see ebsco-side-facets.tpl.php
- */
-function template_preprocess_ebsco_side_facets(&$variables) {
-  global $_ebsco_document;
-
-  if (empty($_ebsco_document)) {
-    $_ebsco_document = new EBSCODocument();
-  }
-  $_ebsco_document->info();
-
-  $variables['record_count'] = $_ebsco_document->record_count();
-  $variables['expanders'] = $_ebsco_document->expanders();
-  $variables['limiters'] = $_ebsco_document->limiters();
-  $variables['facets'] = $_ebsco_document->facets();
-  // Applied facets, limiters or expanders.
-  $variables['filters'] = $_ebsco_document->filters();
-  // Hidden parameters.
-  $variables['search_params'] = $_ebsco_document->search_params();
-  // Hidden parameters.
-  $variables['link_search_params'] = $_ebsco_document->link_search_params();
 }
 
 /******************************************

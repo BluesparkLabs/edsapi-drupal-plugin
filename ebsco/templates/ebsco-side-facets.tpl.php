@@ -67,38 +67,39 @@
         </dl>
       <?php endif; ?>
 
-      <dl class="narrow-list navmenu">
-        <dt><?php print t('Limit Results'); ?></dt>
-        <?php foreach ($limiters as $limiter): ?>
-          <dd>
-            <?php if ($limiter['Type'] == 'multiselectvalue'): ?>
-              <label for="<?php print check_plain($limiter['Id']); ?>">
-                <?php print t($limiter['Label']); ?>
-              </label><br />
-              <select name="filter[]" multiple="multiple" id="<?php print check_plain($limiter['Id']); ?>">
-                <option value=""><?php print t('All'); ?></option>
-                <?php foreach ($limiter['Values'] as $option): ?>
-                  <option value="<?php print check_plain($option['Action']); ?>"<?php $option['selected'] ? ' selected="selected"' : ''; ?>>
-                    <?php print check_plain($option['Value']); ?>
-                  </option>
-                <?php endforeach; ?>
-              </select>
-            <?php else: ?>
-              <input type="checkbox" name="filter[]" value="<?php print check_plain(str_replace('value', 'y', $limiter['Action'])); ?>" 
-                <?php print $limiter['selected'] ? ' checked="checked"' : ''; ?> id="<?php print check_plain($limiter['Id']); ?>"
-              />
-              <label for="<?php print check_plain($limiter['Id']); ?>">
-                <?php print check_plain(t($limiter['Label'])); ?>
-              </label>
-            <?php endif; ?>
-          </dd>
-        <?php endforeach; ?>
-      </dl>
-
+      <?php if (count($limiters) > 0): ?>
+          <dl class="narrow-list navmenu">
+            <dt><?php print t('Limit Results'); ?></dt>
+            <?php foreach ($limiters as $limiter): ?>
+              <dd>
+                <?php if ($limiter['Type'] == 'multiselectvalue'): ?>
+                  <label for="<?php print check_plain($limiter['Id']); ?>">
+                    <?php print t($limiter['Label']); ?>
+                  </label><br />
+                  <select name="filter[]" multiple="multiple" id="<?php print check_plain($limiter['Id']); ?>">
+                    <option value=""><?php print t('All'); ?></option>
+                    <?php foreach ($limiter['Values'] as $option): ?>
+                      <option value="<?php print check_plain($option['Action']); ?>"<?php $option['selected'] ? ' selected="selected"' : ''; ?>>
+                        <?php print check_plain($option['Value']); ?>
+                      </option>
+                    <?php endforeach; ?>
+                  </select>
+                <?php else: ?>
+                  <input type="checkbox" name="filter[]" value="<?php print check_plain(str_replace('value', 'y', $limiter['Action'])); ?>"
+                    <?php print $limiter['selected'] ? ' checked="checked"' : ''; ?> id="<?php print check_plain($limiter['Id']); ?>"
+                  />
+                  <label for="<?php print check_plain($limiter['Id']); ?>">
+                    <?php print check_plain(t($limiter['Label'])); ?>
+                  </label>
+                <?php endif; ?>
+              </dd>
+            <?php endforeach; ?>
+          </dl>
+      <?php endif; ?>
       <dl class="narrow-list navmenu">
         <?php if ($expanders): ?>
           <dt><?php print t('Expand Results'); ?></dt>
-        <?php endif; ?>
+
 
         <?php foreach($expanders as $expander): ?>
           <dd>
@@ -114,6 +115,7 @@
         <dd class="submit">
           <input type="submit" name="submit" class="form-submit" value="<?php print t('Update'); ?>" />
         </dd>
+        <?php endif; ?>
       </dl>
 
       <?php if (!empty($facets)): ?>

@@ -46,7 +46,15 @@
     }
 
     print $sort_form;
-    print $pager;
+
+    if (!$hide_custom_area) {
+        print $custom_area;
+    }
+
+    if (!$hide_top_pager) {
+      print $pager;
+    }
+
 
     if (!user_is_logged_in()) {
       $link = '<a href="' . url('user') . '">' . t('Login') . '</a>';
@@ -231,7 +239,7 @@
   <?php foreach ($records as $record):
 
     $id = check_plain($record->record_id());
-    $recordUrl = url('ebsco/result', array('query' => array('id' => $id)));
+    $recordUrl = url($record->p_link, array('absolute' => TRUE));
     $fulltextUrl = url('ebsco/fulltext', array('query' => array('id' => $id)));
     $pdfUrl = url('ebsco/pdf', array('query' => array('id' => $id)));
 
@@ -244,7 +252,7 @@
     <div class="result floatleft">
       <div class="span-2">
       <?php
-        if ($record->small_thumb_link){
+        if ($record->small_thumb_link && !$hide_thumb_link){
           echo '
             <a href="' . $recordUrl . '" class="_record_link">
             <img src="' . $record->small_thumb_link . '" class="book-jacket" alt="' . t('Book jacket') . '"/>
@@ -290,7 +298,7 @@
           echo '<cite>' . $record->summary . '</cite><br />';
         }
 
-        if (!empty($record->subjects)){
+        if (!empty($record->subjects) && !$hide_record_subject){
           echo '<strong>' . t('Subjects') . '</strong>:<span class="quotestart">' . str_replace('<br />', ', ', $record->subjects) . '</span>';
         }
 
@@ -317,18 +325,20 @@
 
       <div class="result-line5">
         <?php
-        if ($record->full_text_availability){
-          echo '<a href="' . $fulltextUrl . '#html" class="icon html fulltext _record_link">';
-          echo t('HTML full text');
-          echo "</a>&nbsp; &nbsp;";
-        }
+        if (!$hide_availability) {
+          if ($record->full_text_availability){
+            echo '<a href="' . $fulltextUrl . '#html" class="icon html fulltext _record_link">';
+            echo t('HTML full text');
+            echo "</a>&nbsp; &nbsp;";
+          }
 
-         if ($record->pdf_availability){
-          echo ' <a href="' . $pdfUrl . '" class="icon pdf fulltext">';
-          echo t('PDF full text');
-          echo "</a>";
-         }
-         ?>
+          if ($record->pdf_availability){
+            echo ' <a href="' . $pdfUrl . '" class="icon pdf fulltext">';
+            echo t('PDF full text');
+            echo "</a>";
+          }
+        }
+       ?>
 
       </div>
       </div>
@@ -337,7 +347,10 @@
     </li>
   <?php endforeach; ?>
   </ol>
-  <?php print $pager; ?>
+    <?php if (!$hide_botton_pager): ?>
+      <?php print $pager; ?>
+    <?php endif; ?>
+
 
 <?php
   }
