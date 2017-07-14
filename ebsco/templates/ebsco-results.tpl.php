@@ -42,7 +42,7 @@
     }
 
     if ($search_time){
-      echo "," . t('query time') . ":" . check_plain(round($search_time, 2)) . " s";
+      echo ", " . t('query time') . ": " . check_plain(round($search_time, 2)) . " s";
     }
 
     print $sort_form;
