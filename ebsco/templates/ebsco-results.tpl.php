@@ -51,9 +51,9 @@
         print $custom_area;
     }
 
-    if (!$hide_top_pager) {
-      print $pager;
-    }
+
+    print $pager;
+
 
 
     if (!user_is_logged_in()) {

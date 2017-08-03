@@ -942,7 +942,7 @@ function ebsco_get_search_results() {
   $variables['records'] = $_ebsco_document->records();
   $variables['record_start'] = $_ebsco_document->record_start();
   $variables['record_end'] = $_ebsco_document->record_end();
-  $variables['record_count'] = $_ebsco_document->record_count();
+  $variables['record_count'] = ebsco_result_format($_ebsco_document->record_count());
   $variables['search_view'] = $_ebsco_document->search_view();
   $variables['search_time'] = $_ebsco_document->search_time();
   $variables['relatedContent'] = $_ebsco_document->relatedContent();
@@ -1087,4 +1087,16 @@ function auto_link($string) {
     $string
   );
   return $linkedString;
+}
+
+function ebsco_result_format($num) {
+  $x = round($num);
+  $x_number_format = number_format($x);
+  $x_array = explode(',', $x_number_format);
+  $x_parts = array('K', 'M', 'B', 'T');
+  $x_count_parts = count($x_array) - 1;
+  $x_display = $x_array[0] . ((int) $x_array[1][0] !== 0 ? '.' . $x_array[1][0] : '');
+  $x_display .= $x_parts[$x_count_parts - 1];
+
+  return $x_display;
 }
